@@ -5,7 +5,7 @@ export default function Home() {
   const [notes, setNotes] = useState([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function Home() {
     setNotes(data);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (editingId) {
       await fetch(`${API_URL}/api/notes/${editingId}`, {
@@ -39,13 +39,13 @@ export default function Home() {
     fetchNotes();
   };
 
-  const handleEdit = (note) => {
+  const handleEdit = (note: any) => {
     setTitle(note.title);
     setContent(note.content);
     setEditingId(note.id);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     await fetch(`${API_URL}/api/notes/${id}`, { method: 'DELETE' });
     fetchNotes();
   };
@@ -77,7 +77,7 @@ export default function Home() {
         </form>
 
         <div className="grid gap-4">
-          {notes.map((note) => (
+          {notes.map((note: any) => (
             <div key={note.id} className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-2 text-black">{note.title}</h2>
               <p className="text-gray-700 mb-4">{note.content}</p>
