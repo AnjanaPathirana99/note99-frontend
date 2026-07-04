@@ -13,30 +13,41 @@ export default function Home() {
   }, []);
 
   const fetchNotes = async () => {
-    const res = await fetch(`${API_URL}/api/notes`);
-    const data = await res.json();
-    setNotes(data);
+    try {
+      const res = await fetch(`${API_URL}/api/notes`);
+      if (!res.ok) throw new Error(`Failed to fetch notes: ${res.status}`);
+      const data = await res.json();
+      setNotes(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (editingId) {
-      await fetch(`${API_URL}/api/notes/${editingId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
-      });
-      setEditingId(null);
-    } else {
-      await fetch(`${API_URL}/api/notes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
-      });
+    try {
+      if (editingId) {
+        const res = await fetch(`${API_URL}/api/notes/${editingId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content }),
+        });
+        if (!res.ok) throw new Error(`Failed to update note: ${res.status}`);
+        setEditingId(null);
+      } else {
+        const res = await fetch(`${API_URL}/api/notes`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, content }),
+        });
+        if (!res.ok) throw new Error(`Failed to create note: ${res.status}`);
+      }
+      setTitle('');
+      setContent('');
+      fetchNotes();
+    } catch (err) {
+      console.error(err);
     }
-    setTitle('');
-    setContent('');
-    fetchNotes();
   };
 
   const handleEdit = (note: any) => {
@@ -46,14 +57,19 @@ export default function Home() {
   };
 
   const handleDelete = async (id: number) => {
-    await fetch(`${API_URL}/api/notes/${id}`, { method: 'DELETE' });
-    fetchNotes();
+    try {
+      const res = await fetch(`${API_URL}/api/notes/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`Failed to delete note: ${res.status}`);
+      fetchNotes();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-8 text-black">Anjana's Note App - v1.0.6</h1>
+        <h1 className="text-4xl font-bold text-center mb-8 text-black">Anjana's Note App - v1.0.1</h1>
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md mb-8">
           <input
             type="text"
@@ -82,10 +98,10 @@ export default function Home() {
               <p className="text-gray-700 mb-4">{note.content}</p>
               <div className="flex gap-2">
                 <button onClick={() => handleEdit(note)} className="bg-yellow-500 text-white px-4 py-2 rounded">
-                  Edit NOte
+                  Edit Note
                 </button>
                 <button onClick={() => handleDelete(note.id)} className="bg-red-500 text-white px-4 py-2 rounded">
-                  Delete NOTe
+                  Delete Note
                 </button>
               </div>
             </div>
